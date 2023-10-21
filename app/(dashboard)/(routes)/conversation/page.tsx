@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ChatCompletionMessageParam } from "openai/resources/index.mjs";
+import axios from "axios";
 
 const ConversationPage = () => {
   const router = useRouter();
@@ -32,7 +33,17 @@ const ConversationPage = () => {
         role: "user",
         content: values.prompt,
       };
+      const newMessages = [...messages, userMessage];
+
+      const response = await axios.post("/api/conversation", {
+        messages: newMessages,
+      });
+
+      setMessages((current) => [...current, userMessage, response.data]);
+
+      form.reset();
     } catch (error: any) {
+      // TODO: Open Pro Modal
       console.log(error);
     } finally {
       router.refresh();
@@ -79,7 +90,15 @@ const ConversationPage = () => {
             </form>
           </Form>
         </div>
-        <div className="space-y-4 mt-4">Messages content</div>
+        <div className="space-y-4 mt-4">
+          <div className="flex flex-col-reverse gap-y-4">
+            {messages.map((message) => (
+              <div className="" key={message.content}>
+                {message.content}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
